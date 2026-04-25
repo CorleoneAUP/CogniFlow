@@ -24,8 +24,8 @@
 
 | Capability | Detail |
 |---|---|
-| Audio Transcription | Groq Whisper Large v3 — French and multilingual |
-| OCR / Vision | Llama 4 Scout 17B via Groq API |
+| Audio Transcription | Whisper Large v3 — French and multilingual |
+| OCR / Vision | Llama 4 Scout 17B  |
 | Text and PDF Ingestion | PDF-to-image conversion + plain text pipeline |
 | BPMN Extraction | Few-shot prompt — structured JSON (actors, nodes, edges) |
 | Diagram Generation | HTML/SVG swimlane, Mermaid `.mmd`, Graphviz `.dot` |
