@@ -3,21 +3,46 @@ OPENBEE Backend — Script autonome pour Colab Terminal
 Lancer avec : python openbee_backend.py
 """
 import os, io, json, uuid, time, base64, tempfile, gc, threading
+from pathlib import Path
 from typing import List
 from fastapi import FastAPI, UploadFile, File, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from groq import Groq
 
+# ─── AUTO-LOAD .env ───────────────────────────────────────────────────────────
+def _load_dotenv():
+    current = Path(__file__).resolve().parent
+    for _ in range(6):
+        env_file = current / ".env"
+        if env_file.exists():
+            for line in env_file.read_text(encoding="utf-8").splitlines():
+                if line.strip() and not line.startswith("#") and "=" in line:
+                    key, _, val = line.partition("=")
+                    key = key.strip()
+                    val = val.strip().strip('"').strip("'")
+                    if key and key not in os.environ:
+                        os.environ[key] = val
+            break
+        current = current.parent
+
+_load_dotenv()
+
 # ─── CONFIGURATION ────────────────────────────────────────────────────────────
-PORT           = 5000
-GROQ_API_KEY   = "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"
-NGROK_TOKEN    = "3CoZ53dm0ivd5jQyWOBClLWABK9_288r3Le7bg8wEBQ1oErUG"
-MODEL_VISION   = "meta-llama/llama-4-scout-17b-16e-instruct"
-MODEL_ANALYSIS = "meta-llama/llama-4-scout-17b-16e-instruct"
-MODEL_WHISPER  = "whisper-large-v3"
+PORT           = int(os.environ.get("PORT", 5000))
+GROQ_API_KEY   = os.environ.get("GROQ_API_KEY", "")
+NGROK_TOKEN    = os.environ.get("NGROK_TOKEN", "")
+MODEL_VISION   = os.environ.get("MODEL_VISION",   "meta-llama/llama-4-scout-17b-16e-instruct")
+MODEL_ANALYSIS = os.environ.get("MODEL_ANALYSIS", "meta-llama/llama-4-scout-17b-16e-instruct")
+MODEL_WHISPER  = os.environ.get("MODEL_WHISPER",  "whisper-large-v3")
+
+if not GROQ_API_KEY:
+    raise EnvironmentError("❌ GROQ_API_KEY manquant — vérifie ton fichier .env")
+if not NGROK_TOKEN:
+    raise EnvironmentError("❌ NGROK_TOKEN manquant — vérifie ton fichier .env")
 
 groq_client = Groq(api_key=GROQ_API_KEY)
+
 
 # ─── FASTAPI APP ──────────────────────────────────────────────────────────────
 app = FastAPI(title="OPENBEE Groq Backend")

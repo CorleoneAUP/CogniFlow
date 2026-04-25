@@ -1,0 +1,31 @@
+# ─── Backend : FastAPI + Groq + Ngrok ────────────────────────────────────────
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Poppler (pdf2image)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Dépendances Python (backend uniquement)
+COPY requirements.txt .
+RUN pip install --no-cache-dir \
+    fastapi \
+    "uvicorn[standard]" \
+    python-multipart \
+    pyngrok \
+    groq \
+    pdf2image \
+    Pillow
+
+COPY backend/ ./backend/
+
+# Variables d'environnement (surchargées par docker-compose)
+ENV GROQ_API_KEY=""
+ENV NGROK_TOKEN=""
+ENV PORT=5000
+
+EXPOSE 5000
+
+CMD ["python", "backend/agents/openbee_backend.py"]

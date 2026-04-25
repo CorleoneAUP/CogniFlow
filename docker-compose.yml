@@ -1,0 +1,47 @@
+services:
+
+  # ── Backend : FastAPI + Groq + Ngrok ────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: openbee_backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      - PORT=5000
+    volumes:
+      - ./backend:/app/backend     # Hot-reload dev
+      - ./diagram_output:/app/diagram_output
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Frontend : Streamlit ─────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: openbee_frontend
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - BACKEND_URL=http://backend:5000
+    volumes:
+      - ./frontend:/app/frontend   # Hot-reload dev
+      - ./diagram_output:/app/diagram_output
+    depends_on:
+      backend:
+        condition: service_healthy
+    # Requis pour Playwright/Chromium headless dans Docker
+    shm_size: "2gb"
+    cap_add:
+      - SYS_ADMIN

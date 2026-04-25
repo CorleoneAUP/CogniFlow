@@ -131,13 +131,75 @@ with tabs[2]:
             st.subheader("🐝 JSON Workflow BPMN")
             st.json(workflow)
 
-            # Téléchargement
+            # Téléchargement JSON
             st.download_button(
                 label="⬇️ Télécharger le JSON Workflow",
                 data=json.dumps(workflow, ensure_ascii=False, indent=2),
                 file_name="workflow_bpmn.json",
                 mime="application/json"
             )
+
+            st.divider()
+
+            # ─── BOUTONS DE GÉNÉRATION ──────────────────────────────────────
+            st.subheader("🚀 Actions")
+            col_btn1, col_btn2 = st.columns(2)
+
+            # ── Bouton 1 : Diagrammes via Cerebras ──────────────────────────
+            with col_btn1:
+                if st.button("🔲 Générer les Diagrammes (Cerebras)", use_container_width=True, type="primary"):
+                    try:
+                        from generate_workflow_cerebras import main as cerebras_main
+                        with st.spinner("⚙️ Génération des diagrammes en cours (Cerebras)..."):
+                            agent_result = cerebras_main(workflow)
+                        st.success("✅ Diagrammes générés !")
+
+                        # Téléchargements
+                        if agent_result.html_content:
+                            st.download_button(
+                                "⬇️ Télécharger le Diagramme HTML",
+                                data=agent_result.html_content,
+                                file_name="workflow.html",
+                                mime="text/html"
+                            )
+                        if agent_result.mermaid_def:
+                            st.download_button(
+                                "⬇️ Télécharger Mermaid (.mmd)",
+                                data=agent_result.mermaid_def,
+                                file_name="workflow.mmd",
+                                mime="text/plain"
+                            )
+                        if agent_result.graphviz_def:
+                            st.download_button(
+                                "⬇️ Télécharger Graphviz (.dot)",
+                                data=agent_result.graphviz_def,
+                                file_name="workflow.dot",
+                                mime="text/plain"
+                            )
+                        if agent_result.summary:
+                            with st.expander("📋 Résumé de l'agent Cerebras"):
+                                st.markdown(agent_result.summary)
+                    except ImportError:
+                        st.error("❌ Module 'cerebras' non installé. Lance : pip install cerebras-cloud-sdk")
+                    except EnvironmentError as e:
+                        st.error(f"❌ {e}\nDéfinis la variable : CEREBRAS_API_KEY=ta_cle")
+                    except Exception as e:
+                        st.error(f"❌ Erreur : {e}")
+
+            # ── Bouton 2 : Création automatique dans OpenBEE ─────────────────
+            with col_btn2:
+                if st.button("🌐 Créer le Workflow dans OpenBEE", use_container_width=True):
+                    try:
+                        from generate_workflow_openbee import main as openbee_main
+                        with st.spinner("🤖 L'agent navigue dans OpenBEE... (peut prendre 2-5 min)"):
+                            result_text = openbee_main(workflow)
+                        st.success("✅ Workflow créé dans OpenBEE !")
+                        with st.expander("📋 Résultat de l'agent"):
+                            st.text(result_text)
+                    except ImportError:
+                        st.error("❌ Module 'browser_use' non installé. Lance : pip install browser-use")
+                    except Exception as e:
+                        st.error(f"❌ Erreur : {e}")
 
         st.divider()
 

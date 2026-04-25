@@ -1,0 +1,24 @@
+
+# ── Backend FastAPI ───────────────────────────────────────────────────────────
+fastapi>=0.115.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+pyngrok>=7.2.0
+
+# ── Groq Cloud (LLM + Whisper) ────────────────────────────────────────────────
+groq>=0.9.0
+
+# ── PDF Processing ────────────────────────────────────────────────────────────
+pdf2image>=1.17.0
+Pillow>=10.3.0
+
+# ── Frontend Streamlit ────────────────────────────────────────────────────────
+streamlit>=1.35.0
+requests>=2.32.0
+
+# ── Browser-Use Agent (OpenBEE automation) ────────────────────────────────────
+browser-use>=0.12.6
+playwright>=1.44.0
+langchain-groq>=0.1.6
+
+
